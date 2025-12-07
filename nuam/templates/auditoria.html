@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Auditoría del sistema NUAM</h2>
+
+{% if mensaje %}
+    <div style="background:rgba(120,0,0,0.7);padding:8px 10px;border-radius:4px;margin-bottom:12px;font-size:13px;">
+        {{ mensaje }}
+    </div>
+{% endif %}
+
+{% if not intentos and not registros %}
+    {# Caso típico cuando no es admin/admin2: solo mensaje #}
+    {% if not mensaje %}
+        <p>No hay datos de auditoría para mostrar.</p>
+    {% endif %}
+{% else %}
+
+    <!-- ========================= -->
+    <!--  BLOQUE 1: LOGIN ATTEMPTS -->
+    <!-- ========================= -->
+    <h3 style="margin-top:10px;">Intentos de inicio de sesión (últimos 100)</h3>
+
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>Fecha / hora</th>
+                <th>Usuario ingresado</th>
+                <th>Usuario autenticado</th>
+                <th>IP</th>
+                <th>Navegador / dispositivo</th>
+                <th>Resultado</th>
+                <th>Mensaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in intentos %}
+                <tr>
+                    <td>{{ i.timestamp }}</td>
+                    <td>{{ i.username }}</td>
+                    <td>
+                        {% if i.user %}
+                            {{ i.user.username }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ i.ip_address|default:"-" }}</td>
+                    <td>{{ i.user_agent|truncatechars:40 }}</td>
+                    <td>
+                        {% if i.successful %}
+                            OK
+                        {% else %}
+                            ERROR
+                        {% endif %}
+                    </td>
+                    <td>{{ i.error_message|default:"-" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7">No hay intentos registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- ========================= -->
+    <!-- BLOQUE 2: REGISTROS NUAM -->
+    <!-- ========================= -->
+    <h3 style="margin-top:20px;">Registros de calificación tributaria (últimos 50)</h3>
+
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha creación</th>
+                <th>Ejercicio</th>
+                <th>Mercado</th>
+                <th>Instrumento</th>
+                <th>Tipo sociedad</th>
+                <th>Valor histórico</th>
+                <th>Calif. trib.</th>
+                <th>ISUF</th>
+                <th>Usuario registro</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in registros %}
+                <tr>
+                    <td>{{ r.id }}</td>
+                    <td>{{ r.fecha_creacion }}</td>
+                    <td>{{ r.ejercicio }}</td>
+                    <td>{{ r.mercado }}</td>
+                    <td>{{ r.instrumento }}</td>
+                    <td>{{ r.get_tipo_sociedad_display }}</td>
+                    <td>{{ r.valor_historico }}</td>
+                    <td>{{ r.calificacion_tributaria|default:"-" }}</td>
+                    <td>
+                        {% if r.isuf %}
+                            Sí
+                        {% else %}
+                            No
+                        {% endif %}
+                    </td>
+                    <td>{{ r.usuario_registro.username }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="10">No hay registros tributarios recientes.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endif %}
+
+<style>
+    h2 { margin-top: 0; }
+    .tabla {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 12px;
+    }
+    .tabla th, .tabla td {
+        border: 1px solid #555;
+        padding: 4px 6px;
+        text-align: left;
+    }
+    .tabla th {
+        background: rgba(0,0,0,0.8);
+    }
+    .tabla tr:nth-child(even) {
+        background: rgba(255,255,255,0.03);
+    }
+</style>
+
+{% endblock %}

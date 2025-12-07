@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Inicio | NUAM{% endblock %}
+{% block hero %}
+<section class="hero" style="background-image:url('{% static "img/hero.jpg" %}');">
+  <div class="hero-content">
+    <h1>Bienvenido a NUAM</h1>
+    <p>Gestiona, analiza y calcula tus calificaciones tributarias fácilmente.</p>
+  </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<h2>Últimos registros</h2>
+<table class="table">
+  <thead>
+    <tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Estado</th><th>Calificación</th></tr>
+  </thead>
+  <tbody>
+    {% for r in registros %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{{ r.nombre }}</td>
+      <td>{{ r.categoria }}</td>
+      <td>{{ r.estado }}</td>
+      <td>{{ r.calificacion }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No hay registros aún.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

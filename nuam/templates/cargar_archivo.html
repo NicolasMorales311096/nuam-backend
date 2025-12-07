@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Carga masiva de archivo</h2>
+
+{% if error %}
+    <div class="msg error">{{ error }}</div>
+{% endif %}
+
+{% if mensaje %}
+    <div class="msg ok">{{ mensaje }}</div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-row">
+        <label for="id_archivo">Seleccionar archivo (solo CSV o XLSX)</label>
+        <input type="file" name="archivo" id="id_archivo" accept=".csv, .xlsx">
+    </div>
+
+    <p style="font-size:13px; margin-top:5px;">
+        El archivo debe incluir las columnas:
+        <strong>Ejercicio, Mercado, Instrumento, Fecha Pago, Secuencia, Tipo Sociedad, Valor Histórico, Calificación Tributaria, ISUF</strong>
+        y <strong>Factores 8–37</strong>.
+    </p>
+
+    <button type="submit" class="btn-primary">Subir archivo</button>
+</form>
+
+{% if nombre_archivo %}
+    <hr style="margin:20px 0;">
+
+    <h3>Resumen de carga</h3>
+
+    <table class="tabla-resumen">
+        <tr>
+            <th>Archivo:</th>
+            <td>{{ nombre_archivo }}</td>
+        </tr>
+        <tr>
+            <th>Tamaño:</th>
+            <td>{{ size_archivo }} bytes</td>
+        </tr>
+        <tr>
+            <th>Registros creados:</th>
+            <td>{{ creados }}</td>
+        </tr>
+        <tr>
+            <th>Errores detectados:</th>
+            <td>{{ errores|length }}</td>
+        </tr>
+    </table>
+
+    {% if creados > 0 %}
+        <p style="margin-top:10px; font-size:13px; color:#00ff99;">
+            ✔ {{ creados }} registros fueron insertados exitosamente en la base de datos.
+        </p>
+    {% endif %}
+
+    {% if errores %}
+        <h3 style="margin-top:25px;">Errores encontrados en el archivo</h3>
+
+        <table class="tabla-errores">
+            <thead>
+                <tr>
+                    <th style="width:70px;">Fila</th>
+                    <th>Error</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in errores %}
+                    <tr>
+                        <td>{{ item.fila }}</td>
+                        <td>{{ item.error }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+{% endif %}
+
+
+<style>
+    h2 { margin-top: 0; }
+
+    form { margin-top: 12px; }
+
+    .form-row {
+        margin-bottom: 8px;
+        display: flex;
+        flex-direction: column;
+        max-width: 350px;
+    }
+
+    label { font-size: 12px; margin-bottom: 3px; }
+
+    input[type="file"] { font-size: 13px; }
+
+    .btn-primary {
+        padding: 7px 12px;
+        border-radius: 4px;
+        border: none;
+        background: #ff6a00;
+        color: #000;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover { opacity: 0.9; }
+
+    .msg {
+        padding: 8px 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        font-size: 13px;
+    }
+    .msg.error { background: rgba(200,0,0,0.6); border: 1px solid #ff7777; }
+    .msg.ok { background: rgba(0,120,0,0.6); border: 1px solid #7dff7d; }
+
+    .tabla-resumen, .tabla-errores {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        margin-top: 10px;
+        background: rgba(0,0,0,0.4);
+    }
+
+    .tabla-resumen th, .tabla-resumen td,
+    .tabla-errores th, .tabla-errores td {
+        border: 1px solid #555;
+        padding: 6px;
+    }
+
+    .tabla-errores th {
+        background: rgba(255,0,0,0.3);
+    }
+
+    .tabla-resumen th {
+        background: rgba(0,0,0,0.7);
+        width: 200px;
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Bienvenido a NUAM</h2>
+
+{% if request.user.is_authenticated %}
+    <p>Usuario conectado: <strong>{{ request.user.username }}</strong></p>
+
+    <ul>
+        <li><a href="{% url 'calcular' %}">Ir al panel de calificaciones</a></li>
+        <li><a href="{% url 'insertar' %}">Ingresar nuevo registro</a></li>
+        <li><a href="{% url 'cargar_archivo' %}">Carga masiva (CSV)</a></li>
+        {% if request.user.username == "admin" or request.user.username == "admin2" %}
+            <li><a href="{% url 'auditoria' %}">Ver auditoría de accesos</a></li>
+        {% endif %}
+    </ul>
+{% else %}
+    <p>Para acceder al sistema debes iniciar sesión.</p>
+    <a href="{% url 'login' %}" class="btn">Ir al login</a>
+{% endif %}
+
+<style>
+    h2 { margin-top: 0; }
+    .btn {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 8px 14px;
+        border-radius: 4px;
+        border: 1px solid #ff6a00;
+        color: #ff6a00;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    .btn:hover {
+        background: #ff6a00;
+        color: #000;
+    }
+    ul li { margin: 4px 0; }
+</style>
+
+{% endblock %}

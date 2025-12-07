@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Modificar registro{% endblock %}
+
+{% block content %}
+<h2>Modificar registro ID {{ registro.id }}</h2>
+
+{% if error %}
+    <div class="alert alert-danger" style="margin-bottom: 10px;">
+        {{ error }}
+    </div>
+{% endif %}
+
+{% if mensaje %}
+    <div class="alert alert-success" style="margin-bottom: 10px;">
+        {{ mensaje }}
+    </div>
+{% endif %}
+
+{% if not registro %}
+    <p>No hay registro para mostrar.</p>
+    <a href="{% url 'calcular' %}" class="btn">Volver</a>
+{% else %}
+<form method="post">
+    {% csrf_token %}
+
+    <div class="grid-2">
+        <div>
+            <label>Ejercicio</label>
+            <input type="number" name="ejercicio" value="{{ registro.ejercicio }}">
+
+            <label>Mercado</label>
+            <input type="text" name="mercado" value="{{ registro.mercado }}">
+
+            <label>Tipo de evento de capital</label>
+            <select name="tipo_evento_capital">
+                <option value="">-- Seleccione --</option>
+                <option value="AUM_CAP" {% if registro.tipo_evento_capital == "AUM_CAP" %}selected{% endif %}>Aumento de capital</option>
+                <option value="DIS_CAP" {% if registro.tipo_evento_capital == "DIS_CAP" %}selected{% endif %}>Disminución de capital</option>
+                <option value="DIV_CAP" {% if registro.tipo_evento_capital == "DIV_CAP" %}selected{% endif %}>Distribución de dividendos</option>
+                <option value="FUSION" {% if registro.tipo_evento_capital == "FUSION" %}selected{% endif %}>Fusión / Reorganización</option>
+                <option value="OTRO" {% if registro.tipo_evento_capital == "OTRO" %}selected{% endif %}>Otro evento</option>
+            </select>
+
+            <label>Monto asociado al evento de capital</label>
+            <input type="number" name="monto_evento_capital" step="0.01" value="{{ registro.monto_evento_capital|default_if_none:'' }}">
+
+            <label>Instrumento</label>
+            <input type="text" name="instrumento" value="{{ registro.instrumento }}">
+
+            <label>Fecha de pago</label>
+            <input type="date" name="fecha_pago" value="{{ registro.fecha_pago|date:'Y-m-d' }}">
+
+            <label>Secuencia evento</label>
+            <input type="text" name="secuencia_evento" value="{{ registro.secuencia_evento }}">
+
+            <label>Número dividendo</label>
+            <input type="text" name="numero_dividendo" value="{{ registro.numero_dividendo|default_if_none:'' }}">
+
+            <label>Tipo de sociedad</label>
+            <select name="tipo_sociedad">
+                <option value="SAA" {% if registro.tipo_sociedad == 'SAA' %}selected{% endif %}>SAA</option>
+                <option value="SAC" {% if registro.tipo_sociedad == 'SAC' %}selected{% endif %}>SAC</option>
+                <option value="SPA" {% if registro.tipo_sociedad == 'SPA' %}selected{% endif %}>SPA</option>
+                <option value="LTDA" {% if registro.tipo_sociedad == 'LTDA' %}selected{% endif %}>LTDA</option>
+                <option value="EIRL" {% if registro.tipo_sociedad == 'EIRL' %}selected{% endif %}>EIRL</option>
+                <option value="EXT" {% if registro.tipo_sociedad == 'EXT' %}selected{% endif %}>Extranjera</option>
+                <option value="OTRA" {% if registro.tipo_sociedad == 'OTRA' %}selected{% endif %}>Otra</option>
+            </select>
+
+            <label>Valor histórico</label>
+            <input type="number" name="valor_historico" value="{{ registro.valor_historico }}">
+
+            <label>Descripción</label>
+            <textarea name="descripcion">{{ registro.descripcion|default_if_none:'' }}</textarea>
+
+            <label>Calificación tributaria</label>
+            <input type="number" name="calificacion_tributaria" step="0.1" value="{{ registro.calificacion_tributaria|default_if_none:'' }}">
+
+            <label>¿Registro ISUF?</label>
+            <input type="checkbox" name="isuf" {% if registro.isuf %}checked{% endif %}>
+        </div>
+
+
+       <!-- ============================================================ -->
+<!--             FACTORES 8 AL 37 - VERSIÓN DEFINITIVA           -->
+<!-- ============================================================ -->
+<div>
+    <h3>Factores 8 al 37</h3>
+    <p style="font-size: 12px;">Formato: hasta 1 entero y 8 decimales.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+
+        <div><label>Factor 8</label><input name="factor_8" value="{{ registro.factor_8 }}"></div>
+        <div><label>Factor 9</label><input name="factor_9" value="{{ registro.factor_9 }}"></div>
+        <div><label>Factor 10</label><input name="factor_10" value="{{ registro.factor_10 }}"></div>
+
+        <div><label>Factor 11</label><input name="factor_11" value="{{ registro.factor_11 }}"></div>
+        <div><label>Factor 12</label><input name="factor_12" value="{{ registro.factor_12 }}"></div>
+        <div><label>Factor 13</label><input name="factor_13" value="{{ registro.factor_13 }}"></div>
+
+        <div><label>Factor 14</label><input name="factor_14" value="{{ registro.factor_14 }}"></div>
+        <div><label>Factor 15</label><input name="factor_15" value="{{ registro.factor_15 }}"></div>
+        <div><label>Factor 16</label><input name="factor_16" value="{{ registro.factor_16 }}"></div>
+
+        <div><label>Factor 17</label><input name="factor_17" value="{{ registro.factor_17 }}"></div>
+        <div><label>Factor 18</label><input name="factor_18" value="{{ registro.factor_18 }}"></div>
+        <div><label>Factor 19</label><input name="factor_19" value="{{ registro.factor_19 }}"></div>
+
+        <div><label>Factor 20</label><input name="factor_20" value="{{ registro.factor_20 }}"></div>
+        <div><label>Factor 21</label><input name="factor_21" value="{{ registro.factor_21 }}"></div>
+        <div><label>Factor 22</label><input name="factor_22" value="{{ registro.factor_22 }}"></div>
+
+        <div><label>Factor 23</label><input name="factor_23" value="{{ registro.factor_23 }}"></div>
+        <div><label>Factor 24</label><input name="factor_24" value="{{ registro.factor_24 }}"></div>
+        <div><label>Factor 25</label><input name="factor_25" value="{{ registro.factor_25 }}"></div>
+
+        <div><label>Factor 26</label><input name="factor_26" value="{{ registro.factor_26 }}"></div>
+        <div><label>Factor 27</label><input name="factor_27" value="{{ registro.factor_27 }}"></div>
+        <div><label>Factor 28</label><input name="factor_28" value="{{ registro.factor_28 }}"></div>
+
+        <div><label>Factor 29</label><input name="factor_29" value="{{ registro.factor_29 }}"></div>
+        <div><label>Factor 30</label><input name="factor_30" value="{{ registro.factor_30 }}"></div>
+        <div><label>Factor 31</label><input name="factor_31" value="{{ registro.factor_31 }}"></div>
+
+        <div><label>Factor 32</label><input name="factor_32" value="{{ registro.factor_32 }}"></div>
+        <div><label>Factor 33</label><input name="factor_33" value="{{ registro.factor_33 }}"></div>
+        <div><label>Factor 34</label><input name="factor_34" value="{{ registro.factor_34 }}"></div>
+
+        <div><label>Factor 35</label><input name="factor_35" value="{{ registro.factor_35 }}"></div>
+        <div><label>Factor 36</label><input name="factor_36" value="{{ registro.factor_36 }}"></div>
+        <div><label>Factor 37</label><input name="factor_37" value="{{ registro.factor_37 }}"></div>
+
+    </div>
+</div>
+
+
+    <button type="submit" class="btn btn-primary" style="margin-top:20px;">Guardar cambios</button>
+
+</form>
+{% endif %}
+{% endblock %}

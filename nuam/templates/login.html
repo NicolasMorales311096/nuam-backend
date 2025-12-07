@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Ingreso a NUAM</h2>
+
+{% if error %}
+    <div class="msg error">{{ error }}</div>
+{% endif %}
+{% if message %}
+    <div class="msg ok">{{ message }}</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-row">
+        <label for="id_username">Usuario</label>
+        <input type="text" name="username" id="id_username" required>
+    </div>
+
+    <div class="form-row">
+        <label for="id_password">Contraseña</label>
+        <input type="password" name="password" id="id_password" required>
+    </div>
+
+    <button type="submit" class="btn-primary">Ingresar</button>
+</form>
+
+<style>
+    h2 { margin-top: 0; }
+    form {
+        max-width: 420px;
+        margin-top: 15px;
+    }
+    .form-row {
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+    }
+    label {
+        font-size: 13px;
+        margin-bottom: 3px;
+    }
+    input {
+        padding: 6px 8px;
+        border-radius: 4px;
+        border: 1px solid #555;
+        background: rgba(0,0,0,0.7);
+        color: #fff;
+    }
+    .btn-primary {
+        margin-top: 10px;
+        padding: 8px 14px;
+        border-radius: 4px;
+        border: none;
+        background: #ff6a00;
+        color: #000;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+    .msg {
+        padding: 8px 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        font-size: 13px;
+    }
+    .msg.error {
+        background: rgba(200,0,0,0.6);
+        border: 1px solid #ff7777;
+    }
+    .msg.ok {
+        background: rgba(0,120,0,0.6);
+        border: 1px solid #7dff7d;
+    }
+</style>
+
+{% endblock %}

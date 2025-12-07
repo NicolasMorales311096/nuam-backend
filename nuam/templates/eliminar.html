@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Eliminar registro</h2>
+
+{% if error %}
+    <div class="msg error">{{ error }}</div>
+{% endif %}
+{% if mensaje %}
+    <div class="msg ok">{{ mensaje }}</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-row">
+        <label for="id_registro">ID del registro a eliminar</label>
+        <input type="number" name="registro_id" id="id_registro">
+    </div>
+    <button type="submit" class="btn-danger">Eliminar</button>
+</form>
+
+<h3>Últimos registros</h3>
+<table class="tabla">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Ejercicio</th>
+            <th>Mercado</th>
+            <th>Instrumento</th>
+            <th>Fecha pago</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in registros %}
+            <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.ejercicio }}</td>
+                <td>{{ r.mercado }}</td>
+                <td>{{ r.instrumento }}</td>
+                <td>{{ r.fecha_pago }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5">No hay registros.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<style>
+    h2 { margin-top: 0; }
+    .form-row {
+        margin-bottom: 8px;
+        max-width: 260px;
+        display: flex;
+        flex-direction: column;
+    }
+    label { font-size: 12px; margin-bottom: 3px; }
+    input {
+        padding: 5px 7px;
+        border-radius: 4px;
+        border: 1px solid #555;
+        background: rgba(0,0,0,0.7);
+        color: #fff;
+    }
+    .btn-danger {
+        padding: 7px 12px;
+        border-radius: 4px;
+        border: none;
+        background: #c62828;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .btn-danger:hover { opacity: 0.9; }
+    .msg {
+        padding: 8px 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        font-size: 13px;
+    }
+    .msg.error { background: rgba(200,0,0,0.6); border: 1px solid #ff7777; }
+    .msg.ok { background: rgba(0,120,0,0.6); border: 1px solid #7dff7d; }
+    .tabla {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 12px;
+    }
+    .tabla th, .tabla td {
+        border: 1px solid #555;
+        padding: 4px 6px;
+        text-align: left;
+    }
+    .tabla th { background: rgba(0,0,0,0.8); }
+</style>
+
+{% endblock %}

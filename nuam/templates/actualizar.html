@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-form">
+
+    <h2 class="titulo">Actualizar Registro</h2>
+
+    <p class="info-text">
+        Aquí podrás actualizar datos cuando conectemos la base de datos.  
+        Por ahora esta página está configurada y protegida con login, lista para usarse.
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Nombre:</label>
+        <input type="text" name="nombre" placeholder="Ingrese el nombre..." required>
+
+        <label>Apellido:</label>
+        <input type="text" name="apellido" placeholder="Ingrese el apellido..." required>
+
+        <label>Edad:</label>
+        <input type="number" name="edad" placeholder="Ingrese la edad..." required>
+
+        <label>Correo:</label>
+        <input type="email" name="correo" placeholder="Ingrese el correo..." required>
+
+        <label>Descripción:</label>
+        <textarea name="descripcion" placeholder="Ingrese la descripción..." required></textarea>
+
+        <button type="submit" class="btn-actualizar">Actualizar</button>
+    </form>
+
+    <a href="{% url 'home' %}" class="btn-volver">Volver al inicio</a>
+
+</div>
+
+{% endblock %}

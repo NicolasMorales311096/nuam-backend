@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    /* Estilo para inputs con error (lo usaremos en JavaScript) */
+    .input-error {
+        border: 2px solid red !important;
+        background-color: #ffeaea;
+    }
+</style>
+
+<h2>Ingreso de Calificaciones Tributarias</h2>
+
+{% if mensaje %}
+    <div style="background: #0a570a; padding: 8px; border-radius: 5px; margin-bottom: 10px;">
+        {{ mensaje }}
+    </div>
+{% endif %}
+
+{% if error %}
+    <div style="background: #7a1111; padding: 8px; border-radius: 5px; margin-bottom: 10px;">
+        {{ error }}
+    </div>
+{% endif %}
+
+<form method="post" id="factor-form">
+    {% csrf_token %}
+
+    <fieldset style="margin-bottom: 15px;">
+        <legend><strong>Datos generales</strong></legend>
+
+        <label>Ejercicio (Año):</label><br>
+        <input type="number" name="ejercicio"
+               value="{{ form_data.ejercicio|default_if_none:'' }}"
+               min="1900" max="2100" required>
+        <br><br>
+
+        <label>Mercado (2 a 5 caracteres):</label><br>
+        <input type="text" name="mercado"
+               value="{{ form_data.mercado|default_if_none:'' }}"
+               minlength="2" 
+               maxlength="5" 
+               pattern="[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+" 
+               title="ingrese de 2 a 5 caracteres."
+               required>
+        <br><br>
+
+        <label>Tipo de evento de capital:(Obligatorio)</label><br>
+        <select name="tipo_evento_capital" required> 
+            <option value="">-- Seleccione --</option>
+            <option value="AUM_CAP" {% if form_data.tipo_evento_capital == "AUM_CAP" %}selected{% endif %}>
+                Aumento de capital
+            </option>
+            <option value="DIS_CAP" {% if form_data.tipo_evento_capital == "DIS_CAP" %}selected{% endif %}>
+                Disminución de capital
+            </option>
+            <option value="DIV_CAP" {% if form_data.tipo_evento_capital == "DIV_CAP" %}selected{% endif %}>
+                Distribución de dividendos
+            </option>
+            <option value="FUSION" {% if form_data.tipo_evento_capital == "FUSION" %}selected{% endif %}>
+                Fusión / Reorganización societaria
+            </option>
+            <option value="OTRO" {% if form_data.tipo_evento_capital == "OTRO" %}selected{% endif %}>
+                Otro evento de capital
+            </option>
+        </select>
+        <br><br>
+
+        <label>Monto asociado al evento de capital:(Mínimo 150000)</label><br>
+        <input type="number" name="monto_evento_capital"
+               step="1" 
+               min="150000" 
+               title="El monto mínimo requerido es 150000"
+               value="{{ form_data.monto_evento_capital|default_if_none:'' }}"
+               placeholder="Ej: 150000">
+        <br><br>
+
+        <label>Instrumento:</label><br>
+        <input type="text" name="instrumento"
+               value="{{ form_data.instrumento|default_if_none:'' }}"
+               maxlength="100" 
+               pattern="[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+"
+               title="Solo se permiten letras en el instrumento."
+               required>
+        <br><br>
+
+        <label>Fecha de pago:</label><br>
+        <input type="date" name="fecha_pago"
+               value="{{ form_data.fecha_pago|default_if_none:'' }}"
+               required>
+        <br><br>
+
+        <label>Secuencia del evento:</label><br>
+        <input type="number" name="secuencia_evento"
+               value="{{ form_data.secuencia_evento|default_if_none:'' }}"
+               maxlength="10" 
+               step="1" 
+               placeholder="Ej: 1234567890"
+               required>
+        <br><br>
+
+        <label>Número de dividendo (Mínimo 150000, opcional):</label><br>
+        <input type="number" name="numero_dividendo"
+               value="{{ form_data.numero_dividendo|default_if_none:'' }}"
+               min="150000"
+               title="El número de dividendo mínimo requerido es 150000"
+               step="1">
+        <br><br>
+
+        <label>Tipo de sociedad emisora:</label><br>
+        <select name="tipo_sociedad" required>
+            <option value="">-- Seleccione --</option>
+            <option value="SAA" {% if form_data.tipo_sociedad == "SAA" %}selected{% endif %}>
+                Sociedad Anónima Abierta (S.A. Abierta)
+            </option>
+            <option value="SAC" {% if form_data.tipo_sociedad == "SAC" %}selected{% endif %}>
+                Sociedad Anónima Cerrada (S.A. Cerrada)
+            </option>
+            <option value="SPA" {% if form_data.tipo_sociedad == "SPA" %}selected{% endif %}>
+                Sociedad por Acciones (SpA)
+            </option>
+            <option value="LTDA" {% if form_data.tipo_sociedad == "LTDA" %}selected{% endif %}>
+                Sociedad de Responsabilidad Limitada (Ltda.)
+            </option>
+            <option value="EIRL" {% if form_data.tipo_sociedad == "EIRL" %}selected{% endif %}>
+                Empresa Individual de Responsabilidad Limitada (EIRL)
+            </option>
+            <option value="EXT" {% if form_data.tipo_sociedad == "EXT" %}selected{% endif %}>
+                Sociedad Extranjera
+            </option>
+            <option value="OTRA" {% if form_data.tipo_sociedad == "OTRA" %}selected{% endif %}>
+                Otra entidad / vehículo de inversión
+            </option>
+        </select>
+        <br><br>
+
+        <label>Valor histórico:(Mínimo 150000)</label><br>
+        <input type="number" name="valor_historico"
+               value="{{ form_data.valor_historico|default_if_none:'' }}"
+               min="150000" 
+               step="1" 
+               title="El valor histórico mínimo requerido es 150000"
+               required>
+        <br><br>
+
+        <label>Descripción (opcional):</label><br>
+        <textarea name="descripcion" rows="2">{{ form_data.descripcion|default_if_none:'' }}</textarea>
+        <br><br>
+
+        <label>Calificación tributaria (1.0 a 7.0, opcional):</label><br>
+        <input type="number" name="calificacion_tributaria"
+               value="{{ form_data.calificacion_tributaria|default_if_none:'' }}"
+               step="0.1" min="1.0" max="7.0">
+        <br><br>
+
+        <!--  NUEVO: Checkbox ISUF -->
+        <label>¿Registro ISUF?</label><br>
+        <input type="checkbox" name="isuf"
+               {% if form_data.isuf %}checked{% endif %}>
+        <span style="font-size: 12px;">Marcar si el registro corresponde a ISUF.</span>
+    </fieldset>
+
+    <fieldset style="margin-bottom: 15px;">
+        <legend><strong>Factores 8 al 37 (1 entero y 8 decimales)</strong></legend>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+
+            <div>
+                <label>Factor 8:</label><br>
+                <input type="text" name="factor_8" class="factor-input"
+                       value="{{ form_data.factor_8|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 9:</label><br>
+                <input type="text" name="factor_9" class="factor-input"
+                       value="{{ form_data.factor_9|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 10:</label><br>
+                <input type="text" name="factor_10" class="factor-input"
+                       value="{{ form_data.factor_10|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 11:</label><br>
+                <input type="text" name="factor_11" class="factor-input"
+                       value="{{ form_data.factor_11|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 12:</label><br>
+                <input type="text" name="factor_12" class="factor-input"
+                       value="{{ form_data.factor_12|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 13:</label><br>
+                <input type="text" name="factor_13" class="factor-input"
+                       value="{{ form_data.factor_13|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 14:</label><br>
+                <input type="text" name="factor_14" class="factor-input"
+                       value="{{ form_data.factor_14|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 15:</label><br>
+                <input type="text" name="factor_15" class="factor-input"
+                       value="{{ form_data.factor_15|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 16:</label><br>
+                <input type="text" name="factor_16" class="factor-input"
+                       value="{{ form_data.factor_16|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 17:</label><br>
+                <input type="text" name="factor_17" class="factor-input"
+                       value="{{ form_data.factor_17|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 18:</label><br>
+                <input type="text" name="factor_18" class="factor-input"
+                       value="{{ form_data.factor_18|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 19:</label><br>
+                <input type="text" name="factor_19" class="factor-input"
+                       value="{{ form_data.factor_19|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 20:</label><br>
+                <input type="text" name="factor_20" class="factor-input"
+                       value="{{ form_data.factor_20|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 21:</label><br>
+                <input type="text" name="factor_21" class="factor-input"
+                       value="{{ form_data.factor_21|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 22:</label><br>
+                <input type="text" name="factor_22" class="factor-input"
+                       value="{{ form_data.factor_22|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 23:</label><br>
+                <input type="text" name="factor_23" class="factor-input"
+                       value="{{ form_data.factor_23|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 24:</label><br>
+                <input type="text" name="factor_24" class="factor-input"
+                       value="{{ form_data.factor_24|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 25:</label><br>
+                <input type="text" name="factor_25" class="factor-input"
+                       value="{{ form_data.factor_25|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 26:</label><br>
+                <input type="text" name="factor_26" class="factor-input"
+                       value="{{ form_data.factor_26|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 27:</label><br>
+                <input type="text" name="factor_27" class="factor-input"
+                       value="{{ form_data.factor_27|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 28:</label><br>
+                <input type="text" name="factor_28" class="factor-input"
+                       value="{{ form_data.factor_28|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 29:</label><br>
+                <input type="text" name="factor_29" class="factor-input"
+                       value="{{ form_data.factor_29|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 30:</label><br>
+                <input type="text" name="factor_30" class="factor-input"
+                       value="{{ form_data.factor_30|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 31:</label><br>
+                <input type="text" name="factor_31" class="factor-input"
+                       value="{{ form_data.factor_31|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 32:</label><br>
+                <input type="text" name="factor_32" class="factor-input"
+                       value="{{ form_data.factor_32|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 33:</label><br>
+                <input type="text" name="factor_33" class="factor-input"
+                       value="{{ form_data.factor_33|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 34:</label><br>
+                <input type="text" name="factor_34" class="factor-input"
+                       value="{{ form_data.factor_34|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 35:</label><br>
+                <input type="text" name="factor_35" class="factor-input"
+                       value="{{ form_data.factor_35|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 36:</label><br>
+                <input type="text" name="factor_36" class="factor-input"
+                       value="{{ form_data.factor_36|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+            <div>
+                <label>Factor 37:</label><br>
+                <input type="text" name="factor_37" class="factor-input"
+                       value="{{ form_data.factor_37|default_if_none:'' }}"
+                       pattern="^[0-9]\.[0-9]{8}$"
+                       title="Se debe cumplir con el formato 1 entero y 8 decimales.">
+            </div>
+
+        </div>
+    </fieldset>
+
+    <button type="submit">Guardar registro</button>
+</form>
+
+<hr>
+
+<h3>Últimos registros ingresados</h3>
+
+{% if registros %}
+    <table border="1" cellpadding="5" cellspacing="0" style="font-size: 13px; width: 100%; background: rgba(0,0,0,0.4);">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ejercicio</th>
+                <th>Mercado</th>
+                <th>Instrumento</th>
+                <th>Fecha pago</th>
+                <th>Tipo sociedad</th>
+                <th>Valor histórico</th>
+                <th>Calif. trib.</th>
+                <th>ISUF</th>
+                <th>Usuario registro</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in registros %}
+            <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.ejercicio }}</td>
+                <td>{{ r.mercado }}</td>
+                <td>{{ r.instrumento }}</td>
+                <td>{{ r.fecha_pago }}</td>
+                <td>{{ r.get_tipo_sociedad_display }}</td>
+                <td>{{ r.valor_historico }}</td>
+                <td>{{ r.calificacion_tributaria }}</td>
+                <td>{{ r.isuf|yesno:"Sí,No" }}</td>
+                <td>{{ r.usuario_registro.username }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No hay registros aún.</p>
+{% endif %}
+
+{% endblock %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('factor-form');
+
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    return; 
+                }
+
+                const inputs = document.querySelectorAll('.factor-input');
+                const valoresVistos = {}; 
+                const inputsConError = [];
+                let hayRepetidos = false;
+
+                inputs.forEach(input => {
+                    input.classList.remove('input-error'); 
+
+                    let valor = input.value.trim().replace(',', '.'); 
+                    
+                    if (valor !== "" && input.checkValidity()) { 
+                        const valorNormalizado = Number.parseFloat(valor).toFixed(8); 
+
+                        if (valoresVistos[valorNormalizado]) {
+                            hayRepetidos = true;
+                            inputsConError.push(input);
+                            
+                            if (!inputsConError.includes(valoresVistos[valorNormalizado])) {
+                                inputsConError.push(valoresVistos[valorNormalizado]);
+                            }
+
+                        } else {
+                            valoresVistos[valorNormalizado] = input;
+                        }
+                    }
+                });
+
+                if (hayRepetidos) {
+                    event.preventDefault(); 
+                    
+                    const valoresRepetidosUnicos = new Set(inputsConError.map(i => i.value));
+                    
+                    inputsConError.forEach(input => {
+                        input.classList.add('input-error');
+                    });
+                    
+                    alert(' Error de Validación:\nLos siguientes valores de factor se encuentran repetidos y deben ser únicos: ' + Array.from(valoresRepetidosUnicos).join(', ') + '.\nPor favor, corrija los campos resaltados en rojo.');
+                }
+            });
+        }
+    });
+</script>

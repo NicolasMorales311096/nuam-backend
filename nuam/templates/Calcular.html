@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Panel de Calificaciones Tributarias</h2>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px;">
+    <form method="get" class="filtros" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label>Mercado:</label>
+        <select name="mercado">
+            <option value="" {% if mercado_filtro == 'TODOS' %}selected{% endif %}>Todos</option>
+            <option value="ACN" {% if mercado_filtro == 'ACN' %}selected{% endif %}>ACN</option>
+            <option value="ACCIONES" {% if mercado_filtro == 'ACCIONES' %}selected{% endif %}>Acciones</option>
+            <option value="FONDOS" {% if mercado_filtro == 'FONDOS' %}selected{% endif %}>Fondos</option>
+            <option value="OTROS" {% if mercado_filtro == 'OTROS' %}selected{% endif %}>Otros</option>
+        </select>
+
+        <!-- Nuevo filtro ISUF -->
+        <label>ISUF:</label>
+        <select name="isuf">
+            <option value="" {% if isuf_filtro == 'TODOS' %}selected{% endif %}>Todos</option>
+            <option value="SI" {% if isuf_filtro == 'SI' %}selected{% endif %}>Sí</option>
+            <option value="NO" {% if isuf_filtro == 'NO' %}selected{% endif %}>No</option>
+        </select>
+
+        <button type="submit" class="btn-secondary">Aplicar</button>
+    </form>
+
+    <div style="margin-left:auto;display:flex;gap:15px;font-size:13px;flex-wrap:wrap;">
+        <span><strong>Total registros:</strong> {{ total_registros }}</span>
+        {% if promedio_calificacion %}
+            <span><strong>Promedio calif. tributaria:</strong> {{ promedio_calificacion }}</span>
+        {% endif %}
+    </div>
+</div>
+
+<table class="tabla">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Ejercicio</th>
+            <th>Mercado</th>
+            <th>Instrumento</th>
+            <th>Fecha pago</th>
+            <th>Secuencia</th>
+            <th>Tipo Soc.</th>
+            <th>Valor histórico</th>
+            <th>Calif. trib.</th>
+            <th>ISUF</th> <!-- Nueva columna -->
+            <th>Factores (8–37)</th>
+            <th>Usuario</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in registros %}
+            <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.ejercicio }}</td>
+                <td>{{ r.mercado }}</td>
+                <td>{{ r.instrumento }}</td>
+                <td>{{ r.fecha_pago }}</td>
+                <td>{{ r.secuencia_evento }}</td>
+                <td>{{ r.get_tipo_sociedad_display }}</td>
+                <td>{{ r.valor_historico }}</td>
+                <td>{{ r.calificacion_tributaria|default:"-" }}</td>
+                <td>{{ r.isuf|yesno:"Sí,No" }}</td> <!-- Muestra Sí/No -->
+
+                <td style="text-align:center;">
+                    <button type="button"
+                            class="btn-secondary btn-small"
+                            onclick="toggleFactores('factores-{{ r.id }}')">
+                        Ver factores
+                    </button>
+                </td>
+
+                <td>{{ r.usuario_registro.username }}</td>
+                <td>
+                    {% if user.username == "admin" or user.username == "admin2" %}
+                        <a href="{% url 'modificar' r.id %}">Modificar</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+
+            <!-- Fila plegable con los factores 8–37 -->
+            <tr id="factores-{{ r.id }}" class="fila-factores" style="display:none;">
+                <!-- 👇 antes era colspan="12", ahora sumamos la columna ISUF => 13 -->
+                <td colspan="13">
+                    <div class="factores-contenedor">
+                        <div class="factores-grid">
+                            <div class="fact-item"><span>F8</span><span>{{ r.factor_8|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F9</span><span>{{ r.factor_9|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F10</span><span>{{ r.factor_10|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F11</span><span>{{ r.factor_11|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F12</span><span>{{ r.factor_12|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F13</span><span>{{ r.factor_13|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F14</span><span>{{ r.factor_14|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F15</span><span>{{ r.factor_15|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F16</span><span>{{ r.factor_16|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F17</span><span>{{ r.factor_17|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F18</span><span>{{ r.factor_18|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F19</span><span>{{ r.factor_19|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F20</span><span>{{ r.factor_20|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F21</span><span>{{ r.factor_21|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F22</span><span>{{ r.factor_22|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F23</span><span>{{ r.factor_23|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F24</span><span>{{ r.factor_24|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F25</span><span>{{ r.factor_25|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F26</span><span>{{ r.factor_26|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F27</span><span>{{ r.factor_27|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F28</span><span>{{ r.factor_28|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F29</span><span>{{ r.factor_29|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F30</span><span>{{ r.factor_30|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F31</span><span>{{ r.factor_31|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F32</span><span>{{ r.factor_32|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F33</span><span>{{ r.factor_33|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F34</span><span>{{ r.factor_34|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F35</span><span>{{ r.factor_35|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F36</span><span>{{ r.factor_36|default:"-" }}</span></div>
+                            <div class="fact-item"><span>F37</span><span>{{ r.factor_37|default:"-" }}</span></div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="13">No hay registros para mostrar.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<style>
+    h2 { margin-top: 0; }
+
+    .filtros label { font-size: 13px; }
+
+    select {
+        padding: 4px 6px;
+        border-radius: 4px;
+        border: 1px solid #555;
+        background: rgba(0,0,0,0.7);
+        color: #fff;
+        font-size: 13px;
+    }
+
+    .btn-secondary {
+        padding: 6px 10px;
+        border-radius: 4px;
+        border: 1px solid #ff6a00;
+        background: transparent;
+        color: #ff6a00;
+        cursor: pointer;
+        font-size: 13px;
+    }
+    .btn-secondary:hover {
+        background: #ff6a00;
+        color: #000;
+    }
+    .btn-small {
+        padding: 3px 6px;
+        font-size: 11px;
+    }
+
+    .tabla {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+        font-size: 12px;
+    }
+    .tabla th, .tabla td {
+        border: 1px solid #555;
+        padding: 4px 6px;
+        text-align: left;
+        vertical-align: top;
+    }
+    .tabla th {
+        background: rgba(0,0,0,0.8);
+        white-space: nowrap;
+    }
+    .tabla tr:nth-child(even) {
+        background: rgba(255,255,255,0.03);
+    }
+
+    .factores-contenedor {
+        background: rgba(0,0,0,0.6);
+        padding: 8px;
+        border-radius: 4px;
+    }
+    .factores-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(70px, 1fr));
+        gap: 6px;
+        font-size: 11px;
+    }
+    .fact-item {
+        display: flex;
+        justify-content: space-between;
+        border: 1px solid #444;
+        padding: 2px 4px;
+        border-radius: 3px;
+        background: rgba(20,20,20,0.8);
+    }
+    .fact-item span:first-child {
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    function toggleFactores(id) {
+        const fila = document.getElementById(id);
+        if (fila.style.display === "none" || fila.style.display === "") {
+            fila.style.display = "table-row";
+        } else {
+            fila.style.display = "none";
+        }
+    }
+</script>
+
+{% endblock %}
