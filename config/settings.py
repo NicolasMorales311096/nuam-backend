@@ -3,12 +3,20 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- Básico ---
-SECRET_KEY = "cámbiame-por-un-valor-seguro"
-DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+# ===============================
+# BÁSICO
+# ===============================
 
-# --- Apps ---
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+
+DEBUG = os.getenv("DEBUG", "1") == "1"
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+
+# ===============================
+# APPS
+# ===============================
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -16,11 +24,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "nuam",  #  tu app
+    "nuam",
 ]
+
+# ===============================
+# MIDDLEWARE
+# ===============================
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # producción
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -31,11 +44,14 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 
+# ===============================
+# TEMPLATES
+# ===============================
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        #  Asegúrate de tener la carpeta /templates al lado de manage.py
-        "DIRS": [BASE_DIR /"nuam"/"templates"],
+        "DIRS": [BASE_DIR / "nuam" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -50,7 +66,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# --- Base de datos (sqlite dev) ---
+# ===============================
+# BASE DE DATOS (SQLite)
+# ===============================
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -58,19 +77,40 @@ DATABASES = {
     }
 }
 
-# --- Internacionalización ---
+# ===============================
+# INTERNACIONALIZACIÓN
+# ===============================
+
 LANGUAGE_CODE = "es-cl"
 TIME_ZONE = "America/Santiago"
 USE_I18N = True
 USE_TZ = True
 
-# --- Archivos estáticos ---
-STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]        # /static para desarrollo
-STATIC_ROOT = BASE_DIR / "staticfiles"          # para collectstatic en prod (opcional)
+# ===============================
+# ARCHIVOS ESTÁTICOS
+# ===============================
 
-# --- Media (si subes archivos) ---
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]      # desarrollo
+STATIC_ROOT = BASE_DIR / "staticfiles"        # producción
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# ===============================
+# MEDIA
+# ===============================
+
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# ===============================
+# SEGURIDAD PRODUCCIÓN
+# ===============================
+
+CSRF_TRUSTED_ORIGINS = (
+    os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if os.getenv("CSRF_TRUSTED_ORIGINS")
+    else []
+)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
